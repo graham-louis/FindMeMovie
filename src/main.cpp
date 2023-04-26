@@ -1,10 +1,5 @@
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QWidget>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets>
+#include <QtCore/QVector>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -12,7 +7,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <ctime>
-#include <QtCore/QVector>
+
 
 //read data helper
 std::vector<std::vector<std::string>> readData(){ //read data from csv file
@@ -131,8 +126,15 @@ public:
         for (int i = 1; i < data.size(); i++) { //filter data based on genre and score range
             int rank = std::stoi(data.at(i).at(2));
             std::string rowGenre = data.at(i).at(1);
-            if (rowGenre.find(genre) != std::string::npos && rank >= min && rank <= max) {
-                filteredData.push_back(data.at(i));
+            if (genre != "All Genres") { //if specific genre is selected
+                if (rowGenre.find(genre) != std::string::npos && rank >= min && rank <= max) {
+                    filteredData.push_back(data.at(i));
+                }
+            }
+            else { //if all genres is selected
+                if (rank >= min && rank <= max) {
+                    filteredData.push_back(data.at(i));
+                }
             }
         }
 
@@ -143,7 +145,7 @@ public:
                                            startRangeSelector->value(),
                                            endRangeSelector->value());
         }
-        else {
+        else if(selectedAlgorithm == "Quick Sort") {
             shortList = quickSortHelper(filteredData,
                                         genreSelector->currentText().toStdString(),
                                         startRangeSelector->value(),
@@ -176,6 +178,7 @@ public:
         QFont font("Arial", 12);
 
         genreLabel->setBuddy(genreSelector); //set buddy for genre label
+        genreSelector->addItem("All Genres");
         genreSelector->addItem("Action");
         genreSelector->addItem("Comedy");
         genreSelector->addItem("Drama");
@@ -206,7 +209,7 @@ public:
         //display table with title, rating, and genre of ten movies
         table->setRowCount(10);
         table->setColumnCount(3);
-        table->setHorizontalHeaderLabels(QString("Title;Rating;Genre").split(";"));
+        table->setHorizontalHeaderLabels(QString("Title;Genre;Rating").split(";"));
         table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
         table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
         table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
